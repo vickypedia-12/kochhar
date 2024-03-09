@@ -11,4 +11,5 @@ class KochharItem(scrapy.Item):
     Title = scrapy.Field()
     Publication_Date = scrapy.Field()
     URL = scrapy.Field()
-    pass
+    Content = scrapy.Field()
+    

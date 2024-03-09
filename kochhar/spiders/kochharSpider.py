@@ -1,18 +1,19 @@
-from typing import ItemsView
 import scrapy
-from datetime import datetime
 from ..items import KochharItem
 import requests
 import pdfplumber
+import os
+import io
 
-class kochharSpider(scrapy.Spider):
-    name = 'kochhar'
+
+class KochharSpider(scrapy.Spider):
+    name = "kochhar"
     start_urls = [
-        'https://kochhar.com/knowledge-centre'
+        "https://kochhar.com/knowledge-centre/"
     ]
     
-    
     def parse(self, response) :
+        # print(response.text)
         allDivCards = response.css('div.col-xs-12.col-sm-4.col-md-3')
         for cards in allDivCards:
             title = cards.css('h5 a::text').get()
@@ -26,12 +27,18 @@ class kochharSpider(scrapy.Spider):
         date = response.meta['date']
         url = response.url 
         
-        response = requests.get(url)
-        response.raise_for_status()
-        
+        def scrapePdfFromUrl(url):
+            response = requests.get(url)
+            response.raise_for_status()
+            text_contents = ''
+            with pdfplumber.open(io.BytesIO(response.content)) as pdf:
+                for page in pdf.pages:
+                    text_contents += page.extract_text()
+            return text_contents
         
         items['Title'] = title
         items['Publication_Date'] = date
         items['URL'] = url
+        items['Content'] = scrapePdfFromUrl(url)
         
         yield items
