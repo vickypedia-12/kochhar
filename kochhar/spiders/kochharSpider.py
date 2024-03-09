@@ -16,8 +16,8 @@ class KochharSpider(scrapy.Spider):
         # print(response.text)
         allDivCards = response.css('div.col-xs-12.col-sm-4.col-md-3')
         for cards in allDivCards:
-            title = cards.css('h5 a::text').get()
-            url = cards.css('h5 a').xpath("@href").get()
+            url = cards.css('.language a::attr(href)').get()
+            title = cards.css('.content-section h5::text, .content-section p:nth-child(3)::text').get()
             date = cards.css('.date::text').get()
             yield scrapy.Request(url,callback=self.parse_document, meta={'title': title,'date': date})
              
